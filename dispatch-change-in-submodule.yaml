@@ -1,0 +1,20 @@
+name: Notify main repository of submodule change
+
+on:
+  workflow_call:
+    inputs:
+      submodule_name:
+        required: true
+        type: string
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send repository_dispatch to main repo
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.MAIN_REPO_PAT }}
+          repository: tbd-5m/main
+          event-type: submodule-updated
+          client-payload: '{"submodule": "${{ inputs.submodule_name }}"}'
