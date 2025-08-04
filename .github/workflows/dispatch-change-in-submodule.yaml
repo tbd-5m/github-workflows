@@ -6,6 +6,9 @@ on:
       submodule_name:
         required: true
         type: string
+    secrets:
+      REPO_PAT:
+        required: true
 
 jobs:
   notify:
