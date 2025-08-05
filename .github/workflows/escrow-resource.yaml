@@ -20,11 +20,6 @@ jobs:
 
       - name: Install XVFB
         run: sudo apt-get install -y xvfb
-
-      - name: Start XVFB
-        run: |
-          export DISPLAY=':99.0'
-          Xvfb :99 -screen 0 1920x1080x24 &
         
       - name: Clone escrower script
         run: |
@@ -45,8 +40,8 @@ jobs:
             -x "${{ inputs.submodule_name }}.zip"
 
       - name: Run escrower upload script
-        run: |
-          npx ts-node escrower/upload.ts ${{ inputs.submodule_name }} "${{ inputs.submodule_name }}.zip"
+        run: xvfb-run -s "-screen 0 1920x1080x24" npx ts-node escrower/upload.ts ${{ inputs.submodule_name }} "${{ inputs.submodule_name }}.zip"
+
 
       - name: Dispatch to escrowed repo
         uses: peter-evans/repository-dispatch@v2
