@@ -1,0 +1,49 @@
+name: Download escrow resource
+
+on:
+  workflow_call:
+    inputs:
+      submodule_name:
+        required: true
+        type: string
+    secrets:
+      REPO_PAT:
+        required: true
+
+jobs:
+  escrow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.REPO_PAT }}
+
+      - name: Download escrowed zip
+        run: |
+          echo "📥 Downloading ${{ inputs.submodule_name }}..."
+          curl -L "${{ github.event.client_payload.url }}" -o "${{ inputs.submodule_name }}.zip"
+
+      - name: Unzip resource
+        run: |
+          unzip -o "${{ inputs.submodule_name }}.zip" -d "${{ inputs.submodule_name }}"
+          rm "${{ inputs.submodule_name }}.zip"
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit and push changes
+        run: |
+          git add .
+          git commit -m "new escrow version" || echo "Nothing to commit"
+          git push
+
+      - name: Send repository_dispatch to main repo
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.REPO_PAT }}
+          repository: tbd-5m/main-escrowed
+          event-type: submodule-updated
+          client-payload: '{"submodule": "${{ inputs.submodule_name }}"}'
