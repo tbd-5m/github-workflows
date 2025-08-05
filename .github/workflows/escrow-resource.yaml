@@ -18,9 +18,6 @@ jobs:
       - name: Checkout this repo
         uses: actions/checkout@v4
 
-      - name: Install XVFB
-        run: sudo apt-get install -y xvfb
-        
       - name: Clone escrower script
         run: |
           git clone https://x-access-token:${{ secrets.REPO_PAT }}@github.com/tbd-5m/gh-resource-escrower.git escrower
@@ -40,8 +37,7 @@ jobs:
             -x "${{ inputs.submodule_name }}.zip"
 
       - name: Run escrower upload script
-        run: xvfb-run -s "-screen 0 1920x1080x24" npx ts-node escrower/upload.ts ${{ inputs.submodule_name }} "${{ inputs.submodule_name }}.zip"
-
+        run: npx ts-node escrower/upload.ts ${{ inputs.submodule_name }} "${{ inputs.submodule_name }}.zip
 
       - name: Dispatch to escrowed repo
         uses: peter-evans/repository-dispatch@v2
