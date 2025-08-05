@@ -38,7 +38,7 @@ jobs:
 
       - name: Run escrower upload script
         run: |
-          npx ts-node escrower/upload.ts -- ${{ inputs.submodule_name }} "${{ inputs.submodule_name }}.zip"
+          npx ts-node escrower/upload.ts ${{ inputs.submodule_name }} "${{ inputs.submodule_name }}.zip"
 
       - name: Dispatch to escrowed repo
         uses: peter-evans/repository-dispatch@v2
