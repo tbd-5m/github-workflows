@@ -1,0 +1,44 @@
+name: Escrow resource
+
+on:
+    workflow_call:
+        inputs:
+            submodule_name:
+                required: true
+                type: string
+        secrets:
+            REPO_PAT:
+                required: true
+
+jobs:
+    escrow:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Clone escrower script
+              run: |
+                git clone https://x-access-token:${{ secrets.REPO_PAT }}@github.com/tbd-5m/gh-resource-escrower.git escrower
+            
+            - name: Install dependencies for escrower
+              run: |
+                cd escrower
+                npm install
+                npx playwright install
+
+            - name: Zip submodule
+              run: |
+                zip -r "${{ inputs.submodule_name }}.zip" "${{ inputs.submodule_name }}" -x "escrower/**" -x "node_modules/**" -x ".git/**"
+                
+            - name: Run escrower script
+              run: |
+                ts-node escrower/upload.ts -- ${{ inputs.submodule_name }} "${{ inputs.submodule_name }}.zip"
+
+            - name: Notify escrowed repository to download
+              uses: peter-evans/repository-dispatch@v2
+              with:
+                    token: ${{ secrets.REPO_PAT }}
+                    repository: tbd-5m/${{ inputs.submodule_name }}
+                    event-type: ${{ inputs.submodule_name }}-escrowed
+                    client-payload: '{"submodule": "${{ inputs.submodule_name }}"}'
